@@ -30,11 +30,15 @@ def _derive_key(passphrase: str, salt: bytes) -> bytes:
         p=SCRYPT_P,
     )
 
-def encrypt_bytes(plaintext: bytes, passphrase: str) -> EncResult:
-    salt = os.urandom(SALT_LEN)
-    key  = _derive_key(passphrase, salt)
-    iv   = os.urandom(IV_LEN)
+def encrypt_bytes(plaintext, key_or_pass, is_passphrase=True):
+    if is_passphrase:
+        salt = os.urandom(SALT_LEN)
+        key = _derive_key(key_or_pass, salt)
+    else:
+        salt = b""
+        key = key_or_pass
 
+    iv = os.urandom(IV_LEN)
     cipher = AES.new(key, AES.MODE_GCM, nonce=iv, mac_len=TAG_LEN)
     ciphertext, tag = cipher.encrypt_and_digest(plaintext)
 
@@ -45,7 +49,13 @@ def encrypt_bytes(plaintext: bytes, passphrase: str) -> EncResult:
         tag=tag
     )
 
-def decrypt_bytes(salt: bytes, iv: bytes, ciphertext: bytes, tag: bytes, passphrase: str) -> bytes:
-    key = _derive_key(passphrase, salt)
+def decrypt_bytes(salt, iv, ciphertext, tag, key_or_pass, is_passphrase=True):
+
+    if is_passphrase:
+        key = _derive_key(key_or_pass, salt)
+    else:
+        key = key_or_pass
+
     cipher = AES.new(key, AES.MODE_GCM, nonce=iv, mac_len=TAG_LEN)
-    return cipher.decrypt_and_verify(ciphertext, tag)  # raises ValueError on wrong tag
+    return cipher.decrypt_and_verify(ciphertext, tag)  # raises ValueError if wrong tag
+
