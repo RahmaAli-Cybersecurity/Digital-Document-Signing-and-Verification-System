@@ -1,9 +1,8 @@
-
 import os
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.Util.Padding import pad, unpad
-from phase2_packaging import write_package, read_package
+from packaging_phase2 import write_package, read_package
 
 KEY_FOLDER = "keys"
 OUT_DIR = "data/out"
