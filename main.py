@@ -11,18 +11,23 @@ from asymmetric import (
     ensure_file_exists
 )
 
-IN_DIR  = pathlib.Path("data/in")
-OUT_DIR = pathlib.Path("data/out")
+USER = "sender"
+BASE_DIR = pathlib.Path("data") / USER
+IN_DIR  = BASE_DIR / "inbox"
+OUT_DIR = BASE_DIR / "outbox"
+KEY_DIR = BASE_DIR / "keys"
 
+for d in [IN_DIR, OUT_DIR, KEY_DIR]:
+    d.mkdir(parents=True, exist_ok=True)
 
 # -----------------------------
 # Tkinter file selector
 # -----------------------------
-def select_file(title="Select file"):
+def select_file(title="Select file", initial_dir=None):
     root = tk.Tk()
     root.withdraw()
-    root.attributes("-topmost", True) 
-    file_path = filedialog.askopenfilename(title=title)
+    root.attributes("-topmost", True)
+    file_path = filedialog.askopenfilename(title=title, initialdir=initial_dir)
     root.destroy()
     return file_path
 
