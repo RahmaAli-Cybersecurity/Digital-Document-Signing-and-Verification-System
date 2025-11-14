@@ -20,8 +20,8 @@ OUT_DIR = pathlib.Path("data/out")
 # -----------------------------
 def select_file(title="Select file"):
     root = tk.Tk()
-    root.withdraw()               # hide main Tk window
-    root.attributes("-topmost", True)  # force dialog to front
+    root.withdraw()
+    root.attributes("-topmost", True) 
     file_path = filedialog.askopenfilename(title=title)
     root.destroy()
     return file_path
