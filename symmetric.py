@@ -1,13 +1,17 @@
-from __future__ import annotations
+# symmetric.py 
 import os
 from dataclasses import dataclass
-from typing import Optional
-from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from Crypto.Cipher import AES
+from Crypto.Protocol.KDF import scrypt
 
-# Parameters
-SCRYPT_N, SCRYPT_R, SCRYPT_P = 2**14, 8, 1
-KEY_LEN, SALT_LEN, IV_LEN, TAG_LEN = 32, 16, 12, 16  # AES-256-GCM
+SCRYPT_N = 2**14
+SCRYPT_R = 8
+SCRYPT_P = 1
+
+KEY_LEN = 32    
+SALT_LEN = 16
+IV_LEN   = 12    
+TAG_LEN  = 16
 
 @dataclass
 class EncResult:
@@ -17,18 +21,31 @@ class EncResult:
     tag: bytes
 
 def _derive_key(passphrase: str, salt: bytes) -> bytes:
-    kdf = Scrypt(salt=salt, length=KEY_LEN, n=SCRYPT_N, r=SCRYPT_R, p=SCRYPT_P)
-    return kdf.derive(passphrase.encode("utf-8"))
+    return scrypt(
+        passphrase.encode("utf-8"),
+        salt=salt,
+        key_len=KEY_LEN,
+        N=SCRYPT_N,
+        r=SCRYPT_R,
+        p=SCRYPT_P,
+    )
 
-def encrypt_bytes(plaintext: bytes, passphrase: str, aad: Optional[bytes]=None) -> EncResult:
-    salt, iv = os.urandom(SALT_LEN), os.urandom(IV_LEN)
-    key = _derive_key(passphrase, salt)
-    aes = AESGCM(key)
-    ct_full = aes.encrypt(iv, plaintext, aad)  # ciphertext||tag (last 16 bytes = GCM tag)
-    return EncResult(salt, iv, ct_full[:-TAG_LEN], ct_full[-TAG_LEN:])
+def encrypt_bytes(plaintext: bytes, passphrase: str) -> EncResult:
+    salt = os.urandom(SALT_LEN)
+    key  = _derive_key(passphrase, salt)
+    iv   = os.urandom(IV_LEN)
 
-def decrypt_bytes(salt: bytes, iv: bytes, ciphertext: bytes, tag: bytes,
-                  passphrase: str, aad: Optional[bytes]=None) -> bytes:
+    cipher = AES.new(key, AES.MODE_GCM, nonce=iv, mac_len=TAG_LEN)
+    ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+
+    return EncResult(
+        salt=salt,
+        iv=iv,
+        ciphertext=ciphertext,
+        tag=tag
+    )
+
+def decrypt_bytes(salt: bytes, iv: bytes, ciphertext: bytes, tag: bytes, passphrase: str) -> bytes:
     key = _derive_key(passphrase, salt)
-    aes = AESGCM(key)
-    return aes.decrypt(iv, ciphertext + tag, aad)
+    cipher = AES.new(key, AES.MODE_GCM, nonce=iv, mac_len=TAG_LEN)
+    return cipher.decrypt_and_verify(ciphertext, tag)  # raises ValueError on wrong tag

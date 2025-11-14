@@ -10,7 +10,6 @@
 import sys
 import pathlib
 import getpass
-from cryptography.exceptions import InvalidTag
 from symmetric import encrypt_bytes, decrypt_bytes
 from packaging import write_package, read_package
 
@@ -48,11 +47,15 @@ def decrypt():
             out_path.write_bytes(pt)
             print(f"[+] Decrypted -> {out_path}")
             break
-        except InvalidTag:
+
+        except ValueError:
+            # PyCryptodome raises ValueError if MAC/tag check fails (wrong passphrase)
             print("❌ Wrong passphrase. Please try again.\n")
+
         except FileNotFoundError as e:
             print(f"[!] Package not found for '{base}': {e}")
             return
+
         except Exception as e:
             print(f"[!] Error while decrypting '{base}': {e}")
             return
