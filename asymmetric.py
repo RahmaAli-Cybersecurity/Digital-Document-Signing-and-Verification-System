@@ -55,3 +55,4 @@ def decrypt_for_recipient(base_filename, recipient_private_key_path):
     out_path = os.path.join(OUT_DIR, "dec_" + orig)
     with open(out_path, "wb") as f: f.write(pt)
     print(f"[+] File decrypted -> {out_path}")
+

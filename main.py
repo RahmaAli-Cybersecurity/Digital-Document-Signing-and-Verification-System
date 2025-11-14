@@ -18,6 +18,7 @@ OUT_DIR = pathlib.Path("data/out")
 # -----------------------------
 # Tkinter file selector
 # -----------------------------
+
 def select_file(title="Select file"):
     root = tk.Tk()
     root.withdraw()
@@ -30,6 +31,7 @@ def select_file(title="Select file"):
 # -----------------------------
 # Symmetric (Phase 1)
 # -----------------------------
+
 def symmetric_encrypt():
     file_path = select_file("Select file to encrypt")
     if not file_path:
@@ -72,6 +74,7 @@ def symmetric_decrypt():
 # -----------------------------
 # Per-recipient (Phase 2)
 # -----------------------------
+
 def asymmetric_encrypt_workflow():
     name = input("Recipient name: ").strip()
     file_path = select_file("Select file to encrypt for recipient")
@@ -96,6 +99,7 @@ def asymmetric_decrypt_workflow():
 # -----------------------------
 # Main CLI
 # -----------------------------
+
 if __name__ == "__main__":
     print("=== Secure File Encryption System ===\n")
     mode = input("Encrypt or Decrypt? [e/d]: ").strip().lower()
@@ -111,3 +115,4 @@ if __name__ == "__main__":
             symmetric_decrypt()
         else:
             asymmetric_decrypt_workflow()
+

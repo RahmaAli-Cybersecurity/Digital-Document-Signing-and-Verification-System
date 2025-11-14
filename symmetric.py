@@ -1,4 +1,3 @@
-# symmetric.py 
 import os
 from dataclasses import dataclass
 from Crypto.Cipher import AES

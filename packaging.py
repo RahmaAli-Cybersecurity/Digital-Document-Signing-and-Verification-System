@@ -28,6 +28,7 @@ def write_package(out_dir: str, base_filename: str, algorithm: str,
         "iv_b64": _b64(iv),
         "tag_b64": _b64(tag)
     }
+
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 
@@ -51,3 +52,4 @@ def read_package(out_dir: str, base_filename: str) -> Tuple[Dict[str, Any], byte
     tag  = _b64d(m["tag_b64"])
 
     return m, salt, iv, tag, ciphertext, m.get("original_filename", base_filename)
+
