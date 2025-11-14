@@ -1,5 +1,7 @@
 import pathlib
 import getpass
+import tkinter as tk
+from tkinter import filedialog
 from symmetric import encrypt_bytes, decrypt_bytes
 from packaging import write_package, read_package
 from asymmetric import (
@@ -14,11 +16,26 @@ OUT_DIR = pathlib.Path("data/out")
 
 
 # -----------------------------
+# Tkinter file selector
+# -----------------------------
+def select_file(title="Select file"):
+    root = tk.Tk()
+    root.withdraw()  # hide main window
+    file_path = filedialog.askopenfilename(title=title)
+    root.destroy()
+    return file_path
+
+
+# -----------------------------
 # Symmetric (Phase 1)
 # -----------------------------
 def symmetric_encrypt():
-    name = input("File name in data/in: ").strip()
-    src = IN_DIR / name
+    file_path = select_file("Select file to encrypt")
+    if not file_path:
+        print("[!] No file selected")
+        return
+
+    src = pathlib.Path(file_path)
     if not src.is_file():
         print(f"[!] File not found: {src}")
         return
@@ -32,7 +49,12 @@ def symmetric_encrypt():
 
 
 def symmetric_decrypt():
-    base = input("Base file name to decrypt: ").strip()
+    file_path = select_file("Select file to decrypt")
+    if not file_path:
+        print("[!] No file selected")
+        return
+
+    base = pathlib.Path(file_path).name
     while True:
         pw = getpass.getpass("Passphrase: ")
         try:
@@ -51,10 +73,13 @@ def symmetric_decrypt():
 # -----------------------------
 def asymmetric_encrypt_workflow():
     name = input("Recipient name: ").strip()
-    infile = input("Input file name in data/in: ").strip()
-    infile_path = IN_DIR / infile
-    ensure_file_exists(infile_path)
+    file_path = select_file("Select file to encrypt for recipient")
+    if not file_path:
+        print("[!] No file selected")
+        return
 
+    infile_path = file_path
+    ensure_file_exists(infile_path)
     priv_path, pub_path = generate_or_load_rsa_keys(name)
     encrypt_for_recipient(str(infile_path), pub_path)
 
@@ -71,6 +96,7 @@ def asymmetric_decrypt_workflow():
 # Main CLI
 # -----------------------------
 if __name__ == "__main__":
+    print("=== Secure File Encryption System ===\n")
     mode = input("Encrypt or Decrypt? [e/d]: ").strip().lower()
     if mode == "e":
         workflow = input("Use symmetric or per-recipient encryption? [s/p]: ").strip().lower()
