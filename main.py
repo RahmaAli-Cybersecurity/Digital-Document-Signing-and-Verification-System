@@ -102,7 +102,7 @@ def asymmetric_decrypt_workflow():
     priv_path = f"{OUT_DIR}/{name}_priv.pem"
     ensure_file_exists(priv_path)
 
-    # Fix suffix removal
+    # Removing the suffix for file extensions
     p = pathlib.Path(package_path)
     while p.suffix in [".json", ".package"]:
         p = p.with_suffix("")
