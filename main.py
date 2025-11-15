@@ -68,7 +68,7 @@ def symmetric_decrypt():
             print(f"[+] File decrypted -> {out_path}")
             break
         except Exception as e:
-            print(f"❌ Wrong passphrase or error: {e}")
+            print(f"Wrong passphrase or error: {e}")
 
 
 # -----------------------------
