@@ -87,14 +87,29 @@ def asymmetric_encrypt_workflow():
     priv_path, pub_path = generate_or_load_rsa_keys(name)
     encrypt_for_recipient(str(infile_path), pub_path)
 
+from pathlib import Path  
 
 def asymmetric_decrypt_workflow():
-    base = input("Base file name to decrypt: ").strip()
+    print("Select the encrypted package (.package)")
+    package_path = select_file("Select encrypted package")
+    if not package_path:
+        print("[!] No file selected")
+        return
+
+    ensure_file_exists(package_path)
+
     name = input("Recipient name: ").strip()
     priv_path = f"{OUT_DIR}/{name}_priv.pem"
     ensure_file_exists(priv_path)
-    decrypt_for_recipient(base, priv_path)
 
+    # Fix suffix removal
+    p = pathlib.Path(package_path)
+    while p.suffix in [".json", ".package"]:
+        p = p.with_suffix("")
+
+    base = str(p)
+
+    decrypt_for_recipient(base, priv_path)
 
 # -----------------------------
 # Main CLI
